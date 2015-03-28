@@ -124,8 +124,6 @@ def fix_file(arg,dirname,fname):
                 s = re.sub(r"../../Res/",r"../Res/",s)
                 s = re.sub(r"include ../../Common/CommonDefs.mak",r"include ../Build/Common/CommonDefs.mak",s)
                 s = re.sub(r"include ../../Common/CommonCppMakefile",r"LIB_DIRS += ../../Lib\ninclude ../Build/Common/CommonCppMakefile",s)
-                s = re.sub(r"include ../../Common/CommonCSMakefile",r"LIB_DIRS += ../../Lib\ninclude ../Build/Common/CommonCSMakefile",s)
-                s = re.sub(r"include ../../Common/CommonJavaMakefile",r"LIB_DIRS += ../../Lib\ninclude ../Build/Common/CommonJavaMakefile",s)
 
                 output.write(s)
                 
@@ -247,18 +245,6 @@ logger.info("Building OpenNI...")
 execute_check('make ' + MAKE_ARGS + ' -C ' + SCRIPT_DIR + '/../Build clean > ' + SCRIPT_DIR + '/Output/Build' + PROJECT_NAME + '_clean.txt', 'Cleaning')
 execute_check('make ' + MAKE_ARGS + ' -C ' + SCRIPT_DIR + '/../Build > ' + SCRIPT_DIR + '/Output/Build' + PROJECT_NAME + '.txt', 'Building')
 
-#--------------Doxygen---------------------------------------------------------#
-print "* Creating Doxygen..."
-logger.info("Creating DoxyGen...")
-os.chdir("../../../Source/DoxyGen");
-if os.path.exists("html"):
-    os.system("rm -rf html")
-# Running doxygen
-os.makedirs("html")
-execute_check("doxygen Doxyfile > "+ SCRIPT_DIR + "/Output/EngineDoxy.txt", "Creating Documentation")
-
-# remove unneeded files
-os.system("rm -rf html/*.map html/*.md5 html/*.hhc html/*.hhk html/*.hhp")
 
 #-------------Create Redist Dir------------------------------------------------#
 print "* Creating Redist Dir..."
@@ -277,9 +263,7 @@ if (os.path.exists(REDIST_DIR)):
 os.makedirs(REDIST_DIR)
 os.makedirs(REDIST_DIR + "/Bin")
 os.makedirs(REDIST_DIR + "/Lib")
-os.makedirs(REDIST_DIR + "/Jar")
 os.makedirs(REDIST_DIR + "/Include")
-os.makedirs(REDIST_DIR + "/Documentation")
 os.makedirs(REDIST_DIR + "/Samples")
 os.makedirs(REDIST_DIR + "/Samples/Bin")
 os.makedirs(REDIST_DIR + "/Samples/Bin/" + PLATFORM + "-Debug")
@@ -306,26 +290,11 @@ shutil.copy("Bin/" + PLATFORM + "-Release/libnimCodecs"+LIBS_TYPE, REDIST_DIR + 
 shutil.copy("Bin/" + PLATFORM + "-Release/libnimMockNodes"+LIBS_TYPE, REDIST_DIR + "/Lib")
 shutil.copy("Bin/" + PLATFORM + "-Release/libnimRecorder"+LIBS_TYPE, REDIST_DIR + "/Lib")
 shutil.copy("Bin/" + PLATFORM + "-Release/libOpenNI"+LIBS_TYPE, REDIST_DIR + "/Lib")
-shutil.copy("Bin/" + PLATFORM + "-Release/libOpenNI.jni"+LIBS_TYPE, REDIST_DIR + "/Lib")
 
 #bin
 MonoDetected = 0
 shutil.copy("Bin/" + PLATFORM + "-Release/niReg", REDIST_DIR + "/Bin")
 shutil.copy("Bin/" + PLATFORM + "-Release/niLicense", REDIST_DIR + "/Bin")
-if PLATFORM == 'x86' or PLATFORM == 'x64':
-    if (os.path.exists("/usr/bin/gmcs")):
-        shutil.copy("Bin/" + PLATFORM + "-Release/OpenNI.net.dll", REDIST_DIR + "/Bin")
-        shutil.copy("Bin/" + PLATFORM + "-Release/OpenNI.net.dll", REDIST_DIR + "/Samples/Bin/" + PLATFORM + "-Debug")
-        shutil.copy("Bin/" + PLATFORM + "-Release/OpenNI.net.dll", REDIST_DIR + "/Samples/Bin/" + PLATFORM + "-Release")
-        MonoDetected = 1
-        
-# java wrapper
-shutil.copy("Bin/" + PLATFORM + "-Release/org.openni.jar", REDIST_DIR + "/Jar")
-shutil.copy("Bin/" + PLATFORM + "-Release/org.openni.jar", REDIST_DIR + "/Samples/Bin/" + PLATFORM + "-Debug")
-shutil.copy("Bin/" + PLATFORM + "-Release/org.openni.jar", REDIST_DIR + "/Samples/Bin/" + PLATFORM + "-Release")
-
-#docs
-shutil.copytree("../../Source/DoxyGen/html", REDIST_DIR + "/Documentation/html")
 
 #include
 for includeFile in os.listdir("../../Include"):
@@ -333,8 +302,6 @@ for includeFile in os.listdir("../../Include"):
         shutil.copy("../../Include/" + includeFile, REDIST_DIR + "/Include")
 
 shutil.copytree("../../Include/Linux-x86", REDIST_DIR + "/Include/Linux-x86")
-shutil.copytree("../../Include/Linux-Arm", REDIST_DIR + "/Include/Linux-Arm")
-shutil.copytree("../../Include/MacOSX", REDIST_DIR + "/Include/MacOSX")
 shutil.copytree("Build/Common", REDIST_DIR + "/Samples/Build/Common")
 
 # samples
@@ -353,11 +320,6 @@ if PLATFORM == 'Arm':
     samples_list.remove('NiHandTracker')
     samples_list.remove('NiUserSelection')
 
-if (MonoDetected == 0):
-    samples_list.remove("SimpleRead.net")
-    samples_list.remove("SimpleViewer.net")
-    samples_list.remove("UserTracker.net")
-
 print "Samples:", samples_list
 
 for sample in samples_list:
@@ -366,13 +328,6 @@ for sample in samples_list:
 
 #data
 shutil.copy("../../Data/SamplesConfig.xml", REDIST_DIR + "/Samples/Config/SamplesConfig.xml")
-
-#res
-res_files = os.listdir("Build/Res")
-if '.svn' in res_files:
-    res_files.remove('.svn')
-for res_file in res_files:
-    shutil.copy("Build/Res/" + res_file, REDIST_DIR + "/Samples/Res")
 
 # remove all .svn files
 os.system("find " + REDIST_DIR + "/. | grep .svn | xargs rm -rf")

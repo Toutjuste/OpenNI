@@ -1,9 +1,8 @@
 *~
 Redist/
 Source/DoxyGen/html/
-Build/
 Bin/
 Output/
 Final/
-
+x64-Release/
 

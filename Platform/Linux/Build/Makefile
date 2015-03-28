@@ -25,20 +25,12 @@ ALL_MODULES = \
 ALL_UTILS = \
 	Utils/niReg \
 	Utils/niLicense
-
-ALL_MONO_PROJS = \
-	Wrappers/OpenNI.net
-
-ALL_JAVA_PROJS = \
-	Wrappers/OpenNI.jni \
-	Wrappers/OpenNI.java
 	
 # list all core projects
 ALL_CORE_PROJS = \
 	OpenNI \
 	$(ALL_MODULES) \
-	$(ALL_UTILS) \
-	$(ALL_JAVA_PROJS)
+	$(ALL_UTILS)
 
 # list all samples
 CORE_SAMPLES = \
@@ -68,21 +60,8 @@ else
 	endif
 endif
 
-MONO_SAMPLES = \
-	Samples/SimpleRead.net
-
-MONO_FORMS_SAMPLES = \
-	Samples/SimpleViewer.net \
-	Samples/UserTracker.net
-	
-JAVA_SAMPLES = \
-	Samples/SimpleRead.java \
-	Samples/SimpleViewer.java \
-	Samples/UserTracker.java \
-
 ALL_SAMPLES = \
-	$(CORE_SAMPLES) \
-	$(JAVA_SAMPLES)
+	$(CORE_SAMPLES)
 
 # list all projects that are build
 ALL_BUILD_PROJS = \
@@ -91,34 +70,6 @@ ALL_BUILD_PROJS = \
 
 ALL_PROJS = \
 	$(ALL_BUILD_PROJS)
-
-# decide if CLR projects should be build
-ifneq "$(realpath /usr/bin/gmcs)" ""
-	MONO_INSTALLED = 1
-	
-	ifneq "$(shell gacutil -l | grep System.Windows.Forms)" ""
-		MONO_WINFORMS_INSTALLED = 1
-	endif
-endif
-
-ifeq "$(FORCE_BUILD_CLR)" "1"
-	ifndef MONO_INSTALLED
-		DUMMY:=$(error Mono is not installed! Consider turning off FORCE_BUILD_CLR.)
-	endif
-	
-	ifndef MONO_WINFORMS_INSTALLED
-		DUMMY:=$(error Mono WinForms is not installed! Consider turning off FORCE_BUILD_CLR.)
-	endif
-endif
-
-ifdef MONO_INSTALLED
-	ALL_PROJS += $(ALL_MONO_PROJS)
-	ALL_PROJS += $(MONO_SAMPLES)
-	
-	ifdef MONO_WINFORMS_INSTALLED
-		ALL_PROJS += $(MONO_FORMS_SAMPLES)
-	endif
-endif
 
 ALL_PROJS_CLEAN = $(foreach proj,$(ALL_PROJS),$(proj)-clean)
 
@@ -142,10 +93,6 @@ core: $(ALL_CORE_PROJS)
 
 samples: $(ALL_SAMPLES)
 
-mono_wrapper: Wrappers/OpenNI.net
-
-mono_samples: $(MONO_SAMPLES) $(MONO_FORMS_SAMPLES)
-
 # create projects targets
 $(foreach proj,$(ALL_PROJS),$(eval $(call CREATE_PROJ_TARGET,$(proj))))
 
@@ -156,10 +103,6 @@ Modules/nimRecorder:		OpenNI
 
 Utils/niReg:			OpenNI
 Utils/niLicense:		OpenNI
-
-Wrappers/OpenNI.net:		OpenNI
-Wrappers/OpenNI.jni:		OpenNI
-Wrappers/OpenNI.java:		Wrappers/OpenNI.jni
 
 Samples/NiSimpleRead:		OpenNI
 Samples/NiBackRecorder:		OpenNI
@@ -176,15 +119,6 @@ Samples/NiUserSelection:	OpenNI
 Samples/NiHandTracker:		OpenNI
 Samples/NiViewer:		OpenNI
 Samples/NiSimpleViewer:		OpenNI
-
-Samples/SimpleRead.net:		Wrappers/OpenNI.net
-Samples/SimpleViewer.net:	Wrappers/OpenNI.net
-Samples/UserTracker.net:	Wrappers/OpenNI.net
-
-Samples/SimpleRead.java:	Wrappers/OpenNI.java
-Samples/SimpleViewer.java:	Wrappers/OpenNI.java
-Samples/UserTracker.java:	Wrappers/OpenNI.java
-
 
 # clean is cleaning all projects
 clean: $(ALL_PROJS_CLEAN)
