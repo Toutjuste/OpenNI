@@ -32,7 +32,6 @@ SCRIPT_DIR=`pwd`/`dirname $0`
 # create file list
 LIB_FILES=`ls $SCRIPT_DIR/Lib/*`
 BIN_FILES=`ls $SCRIPT_DIR/Bin/ni*`
-JAR_FILES=`ls $SCRIPT_DIR/Jar/*.jar`
 
 rootfs=
 
@@ -75,7 +74,6 @@ INSTALL_LIB=$rootfs/usr/lib
 INSTALL_BIN=$rootfs/usr/bin
 INSTALL_INC=$rootfs/usr/include/ni
 INSTALL_VAR=$rootfs/var/lib/ni
-INSTALL_JAR=$rootfs/usr/share/java
 
 # make all calls into OpenNI run in this filesystem
 export OPEN_NI_INSTALL_PATH=$rootfs
@@ -114,21 +112,6 @@ if [ "$install" = yes ]; then
 		printf "OK\n"
 	done
 
-	# mono
-	if [ -f $rootfs/usr/bin/gmcs -a -f Bin/OpenNI.net.dll ]; then
-		printf "Installing .Net wrappers...\n"
-		gacutil -i Bin/OpenNI.net.dll -package 2.0 $GACDIR
-	fi
-
-	# java wrappers
-	printf "creating java bindings directory..."
-	mkdir -p $INSTALL_JAR
-	printf "OK\n"
-
-	printf "Installing java bindings..."
-	cp $JAR_FILES $INSTALL_JAR
-	printf "OK\n"
-
 	printf "\n*** DONE ***\n\n"
 
 elif [ "$uninstall" = yes ]; then
@@ -159,19 +142,6 @@ elif [ "$uninstall" = yes ]; then
 	printf "removing shared libraries..."
 	for filename in $LIB_FILES; do
 		rm -f $INSTALL_LIB/`basename $filename`
-	done
-	printf "OK\n"
-
-	# mono
-	if [ -f $rootfs/usr/bin/gmcs -a -f Bin/OpenNI.net.dll ]; then
-		printf "Removing .Net wrappers...\n"
-		gacutil -u OpenNI.net $GACDIR
-	fi
-
-	# java
-	printf "removing java bindings..."
-	for filename in $JAR_FILES; do
-		rm -f $INSTALL_JAR/`basename $filename`
 	done
 	printf "OK\n"
 	
